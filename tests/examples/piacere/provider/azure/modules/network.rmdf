@@ -1,0 +1,65 @@
+metadata: 
+  _provider: azurerm
+  _version: '0.0.1'
+  
+imports:
+  - piacere.azure.network.*
+  - piacere.azure.compute.*
+  - piacere.network.Firewall
+  - piacere.network.Network
+  - piacere.network.Subnet
+    
+node_types:
+  
+  piacere.azure.modules.network.Firewall:
+    description: 'Deploy a Firewall on Azure'
+    extends: piacere.network.Firewall
+    properties:
+    
+      network_security_group_location:
+        type: String
+        description: 'Network security group location'
+        required: true
+  
+    node_templates:
+
+      network_security_group:
+        type: piacere.azure.network.NetworkSecurityGroup
+        properties:
+          name: { get_value: super::name }
+          location: { get_value: network_security_group_location }
+
+
+  piacere.azure.modules.network.Network:
+    description: 'Configure a Network on Azure'
+    extends: piacere.network.Network
+    node_templates:
+      
+      virtual_network:
+        type: piacere.azure.network.VirtualNetwork  
+        properties:
+          name: { get_value: super::name }
+          location: { get_value: super::location }
+          address_space: 
+            - "10.0.0.0/16"
+          
+      subnet:
+        type: piacere.azure.modules.network.Subnet
+        properties:
+          name: { get_value: super::name }
+          subnet.address_prefixes: 
+            - "10.0.2.0/24"
+        relationships:
+          contained_in: virtual_network
+
+          
+  piacere.azure.modules.network.Subnet:
+    description: 'Deploy a Subnet on Azure'
+    extends: piacere.network.Subnet  
+    node_templates:
+      
+      subnet:
+        type: piacere.azure.network.Subnet
+        properties:
+          name: { get_value: super::name }
+          address_prefixes: { get_value: super::cidr_range }

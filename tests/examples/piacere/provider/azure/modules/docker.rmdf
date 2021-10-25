@@ -1,0 +1,57 @@
+metadata: 
+  _provider: azurerm
+  _version: '0.0.1'
+  
+imports:
+  - piacere.azure.*
+  - piacere.docker.DockerContainer
+  - piacere.docker.DockerVolume
+  - piacere.azure.data.*
+  
+node_types:
+
+  piacere.azure.modules.DockerContainer:
+    description: 'A Docker Container instance running a given image'
+    extends: piacere.docker.DockerContainer
+    properties:
+      
+      ports:
+        type: piacere.azure.data.Port
+        description: 'Ports to expose'
+        multiple: true
+        
+      mount_path:
+        type: String
+        description: 'Mount path of the volume'
+        
+    node_templates:
+          
+      docker_group:
+        type: piacere.azure.docker.DockerGroup
+        properties:
+          name: { get_value: super::name }
+          location: { get_value: super::location}
+          ip_address_type: 'public'
+          dns_name_label: { get_value: super::name }
+          container:
+            - image: { get_value: super::image }
+              name: { get_value: super::image }
+              ports: { get_value: ports }
+              volume:
+                name: 'volume-docker-container'
+                mount_path: { get_value: mount_path }
+                empty_dir: true
+                
+
+  piacere.azure.modules.DockerVolume:
+    description: 'A Docker Container Volume shared among containers'    
+    extends: piacere.docker.DockerVolume 
+    node_templates:
+    
+      storage_share:
+        type: piacere.azure.storage.StorageShare
+        properties:
+          name: "storage-share"
+          # This a default value of 10 GBi
+          quota: 10
+                

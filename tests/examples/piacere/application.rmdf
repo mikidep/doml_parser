@@ -1,0 +1,65 @@
+metadata:
+  _version: '0.0.1'
+
+imports:
+  - piacere.compute.Node
+  - piacere.docker.*
+  
+node_types:
+
+  piacere.application.Cloud:
+    description: ''
+    properties:
+      
+      name:
+        type: String
+        description: 'Name for the cloud configuration'
+      
+      location:
+        type: String
+        description: 'Location for the cloud configuration'
+        
+
+  piacere.application.Component:
+    description: ''
+    properties:
+      
+      name:
+        type: String
+        description: 'Name of the component'
+        required: true
+      
+      location:
+        type: String
+        description: 'Location of deployment'
+        required: true
+        default: 'westus2'
+        
+    node_templates:
+    
+      node:
+        type: piacere.compute.Node
+        properties:
+          name: { get_value: name }
+          location: { get_value: location }
+          
+          
+  piacere.application.DockerComponent:
+    description: ''
+    extends: piacere.application.Component
+    properties: 
+      
+      image:
+        type: String
+        description: 'Docker image'
+      
+    node_templates:
+      
+      node:
+        type: piacere.docker.DockerContainer
+        properties: 
+          name: { get_value: super::name }
+          location: { get_value: super::location }
+          image: { get_value: image }
+        
+          

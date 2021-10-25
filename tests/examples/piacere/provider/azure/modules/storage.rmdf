@@ -1,0 +1,21 @@
+metadata: 
+  _provider: azurerm
+  _version: '0.0.1'
+  
+imports:
+  - piacere.azure.*
+  - piacere.storage.StorageAccount
+  
+node_types: 
+
+  piacere.azure.modules.StorageAccount:
+    description: 'A Docker Container instance running a given image'
+    extends: piacere.storage.StorageAccount      
+    node_templates:
+
+      storage_account:
+        type: piacere.azure.storage.StorageAccount
+        properties:
+          name: { get_value: super::name }
+          location: { get_value: super::location }
+                

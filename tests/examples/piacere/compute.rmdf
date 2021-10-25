@@ -1,0 +1,39 @@
+metadata:
+  _version: '0.0.1'
+  
+node_types:
+
+  piacere.compute.Node:
+    description: 'Computing node'
+    properties:
+    
+      name: 
+        type: String
+        description: 'Name'
+        required: true
+        
+      location:
+        type: String
+        description: 'Where to deploy the node'
+        required: true
+      
+      public_key:
+        type: String
+        description: 'Public key for SSH'
+      
+      admin_username:
+        type: String
+        description: 'Administrator username'
+
+      instance_type:
+        type: String
+        description: 'Instance type to run'
+
+  piacere.compute.VirtualMachine:
+    description: 'Deploy a Virtual Machine on the cloud'
+    extends: piacere.compute.Node
+
+  piacere.compute.IoTNode:
+    description: 'IoT Node'
+    extends: piacere.compute.Node
+    

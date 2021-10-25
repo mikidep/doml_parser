@@ -1,0 +1,14 @@
+metadata:
+  _provider: google
+  _version: '0.0.1'
+
+imports:
+  - piacere.application.Cloud
+  - piacere.gcp.modules.network.*
+  
+node_types:
+
+  piacere.gcp.modules.cloud.Cloud:
+    description: 'Cloud description on Google Cloud'
+    extends: piacere.application.Cloud
+  

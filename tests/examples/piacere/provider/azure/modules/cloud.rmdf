@@ -1,0 +1,31 @@
+metadata:
+  _provider: azurerm
+  _version: '0.0.1'
+  
+imports:
+  - piacere.azure.compute.*
+  - piacere.azure.modules.network.*
+  - piacere.application.Cloud
+  
+node_types:
+
+  piacere.azure.modules.cloud.Cloud:
+    description: 'Cloud description on Azure'
+    extends: piacere.application.Cloud
+    node_templates:
+    
+      resource_group:
+        type: piacere.azure.compute.ResourceGroup
+        properties: 
+          name: { get_value: super::name } 
+          location: { get_value: super::location }   
+          
+      availability_set:
+        type: piacere.azure.compute.AvailabilitySet
+        properties:
+          name: { get_value: super::name }
+          location: { get_value: super::location }
+          managed: true
+        relationships:
+          connected_to: resource_group
+          

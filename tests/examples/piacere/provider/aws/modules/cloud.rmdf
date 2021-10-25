@@ -1,0 +1,54 @@
+metadata:
+  _provider: aws
+  _version: '0.0.1'
+  
+imports: 
+  - piacere.aws.ec2.*
+  - piacere.application.Cloud
+  - piacere.aws.modules.network.*
+  
+node_types:
+
+  piacere.aws.modules.cloud.Cloud:
+    description: 'Cloud description on AWS'
+    extends: piacere.application.Cloud        
+    node_templates:
+    
+      internet_gateway:
+        type: piacere.aws.ec2.InternetGateway
+        relationships:
+          connected_to: vpc
+    
+      vpc:
+        type: piacere.aws.ec2.VPC
+        properties:
+          cidr_block: '10.0.0.0/16'
+      
+      route:
+        type: piacere.aws.modules.cloud.Route
+        properties:
+          gateway_id: { get_attribute: internet_gateway.id } 
+        relationships:
+          connected_to: vpc
+                    
+    
+  piacere.aws.modules.cloud.Route:
+    description: 'Route configuration'
+    properties:
+    
+      gateway_id:
+        type: String
+      
+    node_templates:
+    
+      route_table_association:
+        type: piacere.aws.ec2.RouteTableAssociation
+        relationships:
+          connected_to: route_table
+
+      route_table: 
+        type: piacere.aws.ec2.RouteTable
+        properties:
+          route:
+            cidr_block: '0.0.0.0/0'
+            gateway_id: { get_value: gateway_id }

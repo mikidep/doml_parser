@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "doml_parser"
+version = "0.1.0"
+description = ""
+authors = ["Michele De Pascalis <michele.de.pascalis.1024@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+Cerberus = "^1.3.4"
+PyYAML = "^5.4.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+flake8 = "^3.9.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

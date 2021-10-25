@@ -1,0 +1,98 @@
+metadata:
+  _provider: google
+  _version: '0.0.1'
+
+imports:
+  - piacere.gcp.*
+
+data_types:
+
+  piacere.gcp.data.BootDisk:
+    properties:
+      initialize_params:
+        type: piacere.gcp.data.ImageParameters
+        description: 'Parameters for a new disk that will be created alongside the new instance.'
+        
+      auto_delete:
+        type: Boolean
+        description: 'Whether the disk will be auto-deleted when the instance is deleted.'
+
+  piacere.gcp.data.ImageParameters:
+    properties:
+      image:
+        type: String
+        description: 'The image from which to initialize this disk. This can be one of: the image''s self_link, projects/{project}/global/images/{image}, projects/{project}/global/images/family/{family}, global/images/{image}, global/images/family/{family}, family/{family}, {project}/{family}, {project}/{image}, {family}, or {image}.'
+        
+      size:
+        type: String
+        description: 'The size of the image in gigabytes.'
+        
+  piacere.gcp.data.InstanceMetadata:
+    properties:
+      sshKeys:
+        type: String
+        description: 'SSH keys for connecting to the instance'
+        
+  piacere.gcp.data.NetworkInterface:
+    properties:
+      network:
+        type: String
+        description: 'The name or self_link of the network to attach this interface to.'
+        
+      subnetwork:
+        type: String
+        description: 'The name or self_link of the subnetwork to attach this interface to. The subnetwork must exist in the same region this instance will be created in.'
+       
+node_types:
+
+  piacere.gcp.compute.VirtualMachine:
+    alias: google_compute_instance
+    description: 'An instance is a virtual machine (VM) hosted on Google''s infrastructure.'
+    properties:
+      name:
+        type: String
+        description: 'A unique name for the resource, required by GCE.'
+        required: true
+              
+      machine_type:
+        type: String
+        description: 'The machine type to create. Default set to n1-standard-1'
+        default: 'n1-standard-1'
+        
+      boot_disk:
+        type: piacere.gcp.data.BootDisk
+        description: 'The boot disk for the instance. Structure is documented below.'
+        required: true
+        
+      zone:
+        type: String
+        description: 'An optional zone name. If not specified, this instance is deployed in the default zone.'
+                
+      tags:
+        type: String
+        description: 'A list of network tags to attach to the instance.'
+        multiple: true
+        
+      allow_stopping_for_update:
+        type: Boolean
+        description: 'If true, allows Terraform to stop the instance to update its properties.'
+        default: true
+        
+      metadata :
+        type: piacere.gcp.data.InstanceMetadata
+        description: 'Metadata key/value pairs to make available from within the instance.'
+        
+      network_interface:
+        type: piacere.gcp.data.NetworkInterface
+        description: 'Networks to attach to the instance.'
+        
+    edges:
+    
+      subnetwork: 
+        type: piacere.gcp.network.Subnet
+        attribute: self_link
+         
+      network: 
+        type: piacere.gcp.network.Network
+        attribute: self_link
+        

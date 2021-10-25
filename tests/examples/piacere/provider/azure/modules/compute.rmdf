@@ -1,0 +1,68 @@
+metadata: 
+  _provider: azurerm
+  _version: '0.0.1'
+  
+imports:
+  - piacere.azure.compute.*
+  - piacere.azure.network.*
+  - piacere.compute.VirtualMachine
+  
+node_types:
+
+  piacere.azure.modules.compute.VirtualMachine:
+    description: 'Deploy a VirtualMachine instance on Azure'
+    extends: piacere.compute.VirtualMachine
+    node_templates:
+    
+      virtual_machine:
+        type: piacere.azure.compute.VirtualMachine
+        properties:
+          name: { get_value: super::name }
+          location: { get_value: super::location }
+          vm_size: 'Standard_B1ls'
+          # This is a default value which can be overwritten
+          delete_os_disk_on_termination: true
+          delete_data_disks_on_termination: true
+          os_profile_linux_config:
+            disable_password_authentication: true
+            ssh_keys:
+              key_data: { get_value: super::public_key }
+              path: { concat: ["/home/", { get_value: super::admin_username }, "/.ssh/authorized_keys"] }
+          
+          storage_image_reference:
+            publisher: 'Canonical'
+            offer: 'UbuntuServer'
+            sku: '14.04.5-LTS'
+            version: 'latest'
+            
+          storage_os_disk: 
+            name: 'storage-os-disk'
+            caching: 'ReadWrite'
+            create_option: 'FromImage'
+            managed_disk_type: 'Standard_LRS'
+            
+          os_profile:
+            admin_username: { get_value: super::admin_username }
+            computer_name: { get_value: super::name }
+          
+        relationships:
+          connected_to: network_interface
+                  
+      network_interface:
+        type: piacere.azure.network.NetworkInterface
+        properties:
+          name: 'network-interface'
+          location: { get_value: super::location }
+          ip_configuration:
+            name: { get_value: super::name }
+            private_ip_address_allocation: 'Dynamic'
+            public_ip_address_id: { get_attribute: public_ip.id }  
+      
+      public_ip:
+        type: piacere.azure.network.PublicIP
+        properties:
+          name: { get_value: super::name }     
+          location: { get_value: super::location }
+          allocation_method: 'Static'
+  
+
