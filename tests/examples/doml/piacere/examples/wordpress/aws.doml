@@ -90,10 +90,18 @@ node_templates:
           ansible_path: '../ansible/playbook.yaml'
           executor: piacere.aws.ec2.Instance
           run_data:
-            database_host: { get_attribute: database.ip_address }
-            database_name: { get_input: db_name }
-            database_user: { get_input: db_user }
-            database_password: { get_input: db_pass}
+            database_host:
+              type: String
+              value: { get_attribute: database.ip_address }
+            database_name:
+              type: String
+              value: { get_input: db_name }
+            database_user:
+              type: String
+              value: { get_input: db_user }
+            database_password:
+              type: String
+              value: { get_input: db_pass}
 
   database:
     type: piacere.application.Component
@@ -115,7 +123,13 @@ node_templates:
           ansible_path: '../ansible/playbook_database.yaml'
           executor: piacere.aws.ec2.Instance
           run_data:
-            database_name: { get_input: db_name }
-            database_user: { get_input: db_user }
-            database_password: { get_input: db_pass }
+            database_name:
+              type: String
+              value: { get_input: db_name }
+            database_user:
+              type: String
+              value: { get_input: db_user }
+            database_password:
+              type: String
+              value: { get_input: db_pass }
     

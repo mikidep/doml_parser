@@ -22,17 +22,11 @@ class UnresPropertyDef:
 
     def resolve(self, resolver: 'r.Resolver', ctx: 'r.ResolverCtx') \
             -> PropertyDef:
-        if self.type == "String" \
-           or self.type == "Integer" \
-           or self.type == "Float" \
-           or self.type == "Boolean":
-            pd_type = self.type
-        else:
-            pd_type = resolver.resolve_data_type(self.type, ctx)
+        pd_type = ut.resolve_val_type(self.type, resolver, ctx)
 
         def resolve_expr_(v: ut.UnresExpr) -> Expr:
             return resolve_expr(v,
-                                self.type,
+                                pd_type,
                                 resolver,
                                 ctx)
 

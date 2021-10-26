@@ -1,7 +1,7 @@
 from typing import Optional
 from dataclasses import dataclass
 
-from .types import Expr
+from . import types
 from . import node_template as ntpl
 
 
@@ -12,7 +12,14 @@ class Interface:
 
 
 @dataclass
+class RunData:
+    name: str
+    type: 'types.ValType'
+    value: 'types.Expr'
+
+
+@dataclass
 class ConfigureInterface:
     ansible_path: str
     executor: Optional['ntpl.NodeTemplate']
-    run_data: dict[str, Expr]
+    run_data: dict[str, RunData]

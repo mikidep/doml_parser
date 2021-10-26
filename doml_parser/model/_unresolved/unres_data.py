@@ -1,7 +1,7 @@
 from typing import cast
 
 from . import unres_types as ut
-from ..types import Expr, map_or_apply
+from ..types import Expr, ValType, map_or_apply
 from . import resolver as r
 from ..data import Data
 from ..data_type import DataType
@@ -10,46 +10,39 @@ from ...errors import TypeError
 
 class UnresData:
     def __init__(self,
-                 dtype: 'ut.Unres',
+                 dtype: DataType,
                  properties: 'ut.RawData') -> None:
         self.type = dtype
         self.properties = properties
 
-    def resolve(self,
-                resolver: 'r.Resolver',
-                ctx: 'r.ResolverCtx') -> Data:
-        dtype = resolver.resolve_data_type(self.type, ctx)
+    def resolve(self, resolver: 'r.Resolver', ctx: 'r.ResolverCtx') \
+            -> Data:
         properties = {}
         for pname in self.properties:
-            if pname in dtype.prop_defs:
-                pdef = dtype.prop_defs[pname]
-                if type(pdef.type) is str:
-                    utype = pdef.type
-                else:
-                    pdt = cast(DataType, pdef.type)
-                    utype = pdt.name
+            if pname in self.type.prop_defs:
+                pdef = self.type.prop_defs[pname]
                 properties[pname] = map_or_apply(
                     lambda pval: resolve_expr(pval,
-                                              utype,
+                                              pdef.type,
                                               resolver,
                                               ctx),
                     self.properties[pname]
                 )
             else:
-                raise TypeError(f"Undefined property {pname} in "
+                raise TypeError(f"Undefined property '{pname}' in "
                                 + f"data object of type {self.type}.")
 
-        return Data(dtype, properties)
+        return Data(self.type, properties)
 
 
 def resolve_expr(expr: 'ut.UnresExpr',
-                 etype: 'ut.UnresValType',
+                 etype: ValType,
                  resolver: 'r.Resolver',
                  ctx: 'r.ResolverCtx') -> Expr:
     def check_type(v, t, tname):
         if type(v) is not t and not isinstance(v, ut.UnresFunction):
             raise TypeError(f"Expected value of type {tname}, "
-                            + f"found value {v} of type {type(v).__name__}.")
+                            + f"found value '{v}' of type {type(v).__name__}.")
 
     expected_type = (str if etype == "String"
                      else int if etype == "Integer"
@@ -61,6 +54,7 @@ def resolve_expr(expr: 'ut.UnresExpr',
         return expr
     elif isinstance(expr, ut.UnresFunction):
         return expr.resolve(resolver, ctx)
-    else:  # type(expr) is dict
+    else:
+        etype = cast(DataType, etype)
         data = UnresData(etype, expr)
         return data.resolve(resolver, ctx)

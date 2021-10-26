@@ -169,6 +169,11 @@ c_metadata = {
     }
 }
 
+c_run_data = {
+    "type": c_value_data,
+    "value": c_value_expression
+}
+
 c_interface_configure = {
     "ansible_path": {"type": "string"},
     "executor": c_qualified_name | {"required": False},
@@ -176,7 +181,10 @@ c_interface_configure = {
         "type": "dict",
         "required": False,
         "keysrules": ID,
-        "valuesrules": c_simple_value_expression
+        "valuesrules": {
+            "type": "dict",
+            "schema": c_run_data
+        }
     }
 }
 

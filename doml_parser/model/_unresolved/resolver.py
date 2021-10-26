@@ -1,10 +1,9 @@
 from typing import Callable, Optional, Tuple, TypeVar
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from ..types import map_or_else
 
 from . import unres_model as um
-from . import unres_doml_model as udm
 from . import unres_rmdf_model as urm
 from . import unres_node_type as untyp
 from . import unres_node_template as untpl
@@ -17,7 +16,7 @@ from ..node_template import NodeTemplate
 from ..data_type import DataType
 from ..provider import Provider
 
-from ...errors import ReferenceNotFound, MultipleDefinitions
+from ...errors import ReferenceNotFound, MultipleDefinitions, TypeError
 
 
 def _is_imported(ref: 'ut.Unres', ctx: 'ResolverCtx') -> bool:
@@ -39,7 +38,6 @@ class Resolver:
         self.unres_rmdfs = unres_rmdfs
 
         self.node_types: dict[str, NodeType] = {}
-        self.node_templates: dict[str, NodeTemplate] = {}
         self.data_types: dict[str, DataType] = {}
         self.providers: dict[str, Provider] = {}
 
@@ -61,14 +59,79 @@ class Resolver:
         else:
             return needles[0]
 
-    def _find_node_template(self, ntref: 'ut.Unres', ctx: 'ResolverCtx') \
-            -> Optional[Tuple['untpl.UnresNodeTemplate',
-                              'urm.UnresRMDFModel']]:
-        if (nt := ctx.nt_node_templates.get(ntref)) is not None:
-            return (nt, ctx.unres_model)
-        elif type(ctx.unres_model) is udm.UnresDOMLModel:
-            return ctx.unres_model.node_templates.get(ntref)
+    def _find_node_type(self, ntref: 'ut.Unres', ctx: 'ResolverCtx') \
+            -> Optional[Tuple['untyp.UnresNodeType',
+                              'um.UnresModel']]:
+        if _is_imported(ntref, ctx):
+            imp_nt = self._find_in_rmdfs(
+                ntref,
+                lambda unres_rmdf: unres_rmdf.node_types,
+                "node type"
+            )
+        else:
+            imp_nt = None
+        if type(ctx.unres_model) is urm.UnresRMDFModel:
+            nt = ctx.unres_model.node_types.get(ntref)
+            if nt is not None:
+                return (nt, ctx.unres_model)
+            else:
+                return imp_nt
+        else:
+            return imp_nt
 
+    def resolve_node_type(self, ntref: 'ut.Unres', ctx: 'ResolverCtx') \
+            -> NodeType:
+        if (nt := self.node_types.get(ntref)) is not None:
+            return nt
+        elif (unres_nt_r := self._find_node_type(ntref, ctx)) is not None:
+            unresnt, unresrmdf = unres_nt_r
+            nt = NodeType(unresnt.name,
+                          unresnt.description,
+                          unresnt.alias,
+                          None,
+                          {}, {}, {})
+            self.node_types[ntref] = nt
+            nt_ = unresnt.resolve(self, ResolverCtx(
+                unresrmdf  # , node_type=nt
+            ))
+            nt.extends = nt_.extends
+            nt.prop_defs = nt_.prop_defs
+            nt.node_templates = nt_.node_templates
+            nt.edges = nt_.edges
+            return nt
+        else:
+            raise ReferenceNotFound(f"Could not find node type {ntref}.")
+
+    def resolve_node_template(self, ntref: 'ut.Unres', ctx: 'ResolverCtx') \
+            -> NodeTemplate:
+        if ctx.ntpl_ctx is not None:
+            if (nt := ctx.ntpl_ctx.node_templates.get(ntref)) is not None:
+                return nt
+            elif (unresnt := ctx.ntpl_ctx.unres_node_templates.get(ntref)) \
+                    is not None:
+                nt = NodeTemplate(unresnt.name,
+                                  self.resolve_node_type(
+                                      unresnt.type,
+                                      ctx
+                                  ),
+                                  {},
+                                  [],
+                                  {},
+                                  {})
+                ctx.ntpl_ctx.node_templates[ntref] = nt
+                nt_ = unresnt.resolve(self, ctx)
+                nt.properties = nt_.properties
+                nt.relationships = nt_.relationships
+                nt.interfaces = nt_.interfaces
+                nt.capabilities = nt_.capabilities
+                return nt
+            else:
+                raise ReferenceNotFound(
+                    f"Could not find node template {ntref}."
+                )
+        else:
+            raise TypeError("Cannot resolve node template without "
+                            + "a node template context.")
 
     def _find_data_type(self, dtref: 'ut.Unres', ctx: 'ResolverCtx') \
             -> Optional[Tuple['udt.UnresDataType', 'urm.UnresRMDFModel']]:
@@ -89,7 +152,8 @@ class Resolver:
         else:
             return imp_dt
 
-    def resolve_data_type(self, dtref: 'ut.Unres', ctx: 'ResolverCtx') -> DataType:
+    def resolve_data_type(self, dtref: 'ut.Unres', ctx: 'ResolverCtx') \
+            -> DataType:
         if (dt := self.data_types.get(dtref)) is not None:
             return dt
         elif (unres_dt_r := self._find_data_type(dtref, ctx)) is not None:
@@ -130,7 +194,13 @@ class Resolver:
 
 
 @dataclass
+class NodeTplCtx:
+    unres_node_templates: dict[str, 'untpl.UnresNodeTemplate']
+    node_templates: dict[str, NodeTemplate]
+
+
+@dataclass
 class ResolverCtx:
     unres_model: 'um.UnresModel'
-    nt_node_templates: dict[str, 'untpl.UnresNodeTemplate'] \
-        = field(default_factory=lambda: {})
+    # node_type: Optional[NodeType] = None
+    ntpl_ctx: Optional[NodeTplCtx] = None

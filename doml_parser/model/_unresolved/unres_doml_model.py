@@ -29,9 +29,12 @@ class UnresDOMLModel(UnresModel):
         metadata = self.metadata.resolve(resolver, ctx)
         input = {iname: i.resolve(resolver, ctx)
                  for iname, i in self.input.items()}
-        node_templates = {ntname: nt.resolve(resolver, ctx)
+        ntctx = r.ResolverCtx(ctx.unres_model,
+                              # ctx.node_type,
+                              r.NodeTplCtx(self.node_templates, {}))
+        node_templates = {ntname: nt.resolve(resolver, ntctx)
                           for ntname, nt in self.node_templates.items()}
-        output = {oname: o.resolve(resolver, ctx)
+        output = {oname: o.resolve(resolver, ntctx)
                   for oname, o in self.output.items()}
         return DOMLModel(metadata,
                          input,

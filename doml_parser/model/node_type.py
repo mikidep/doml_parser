@@ -2,7 +2,7 @@ from typing import Optional
 from dataclasses import dataclass
 
 from .property_def import PropertyDef
-from .node_template import NodeTemplate
+from . import node_template as ntpl
 from .edge import Edge
 
 
@@ -13,5 +13,5 @@ class NodeType:
     alias: Optional[str]
     extends: Optional['NodeType']
     prop_defs: dict[str, PropertyDef]
-    node_templates: dict[str, NodeTemplate]
+    node_templates: dict[str, 'ntpl.NodeTemplate']
     edges: dict[str, Edge]

@@ -1,14 +1,14 @@
 from typing import Optional, Union
 from dataclasses import dataclass
 
-from .types import Expr, ValType
+from . import types
 
 
 @dataclass
 class PropertyDef:
     name: str
-    type: ValType
+    type: 'types.ValType'
     description: Optional[str]
     required: bool
     multiple: bool
-    default: Optional[Union[Expr, list[Expr]]]
+    default: Optional[Union['types.Expr', list['types.Expr']]]

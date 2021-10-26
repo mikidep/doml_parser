@@ -1,7 +1,10 @@
 from typing import Union, Literal, Tuple
 from abc import ABCMeta, abstractmethod
 
-from ...errors import InvalidRawValue, ReferenceNotFound, StructureError
+from ...errors import (InvalidRawValue,
+                       ReferenceNotFound,
+                       StructureError,
+                       TypeError)
 
 from .resolver import Resolver, ResolverCtx
 from ..types import (Function,
@@ -9,10 +12,12 @@ from ..types import (Function,
                      GetAttribute,
                      Concat,
                      GetInput,
+                     ValType,
                      Expr,
                      map_or_apply)
 from .unres_doml_model import UnresDOMLModel
 from .unres_data import resolve_expr
+from ..data_type import DataType
 
 Unres = str
 
@@ -41,24 +46,28 @@ class UnresGetValue(UnresFunction):
 
     def resolve(self, resolver: Resolver, ctx: ResolverCtx) \
             -> GetValue:
-        pass
+        return GetValue(self.path, self.super)
 
 
 class UnresGetAttribute(UnresFunction):
     def __init__(self, path: list[str]) -> None:
         super().__init__()
-        self.path = path
+        self.node_template: Unres = path[0]
+        self.path = path[1:]
 
     def resolve(self, resolver: Resolver, ctx: ResolverCtx) \
             -> GetAttribute:
-        pass
+        return GetAttribute(
+            resolver.resolve_node_template(self.node_template, ctx),
+            self.path
+        )
 
 
 def _attempt_resolve_expr(expr: UnresExpr,
-                          etypes: list[UnresValType],
+                          etypes: list[ValType],
                           resolver: Resolver,
                           ctx: ResolverCtx) \
-        -> Tuple[Expr, UnresValType]:
+        -> Tuple[Expr, ValType]:
     for etype in etypes:
         try:
             return resolve_expr(expr,
@@ -67,9 +76,13 @@ def _attempt_resolve_expr(expr: UnresExpr,
                                 ctx), etype
         except TypeError:
             pass
-    raise TypeError(f"Expression {expr} could not be resolved "
+    type_names = [
+        t.name if type(t) is DataType else str(t)
+        for t in etypes
+    ]
+    raise TypeError(f"Expression '{expr}' could not be resolved "
                     + "in any of the following types: "
-                    + ", ".join(etypes) + ".")
+                    + ", ".join(type_names) + ".")
 
 
 class UnresConcat(UnresFunction):
@@ -108,11 +121,7 @@ def raw_to_unres_expr(rv) -> UnresExpr:
     elif type(rv) is dict:
         if "get_value" in rv:
             path: str = rv["get_value"]
-            super = False
-            if path.startswith("super::"):
-                super = True
-                path = path[7:]
-            return UnresGetValue(path.split("."), super)
+            return UnresGetValue(path.split("."))
         elif "get_attribute" in rv:
             path: str = rv["get_attribute"]
             return UnresGetAttribute(path.split("."))
@@ -127,3 +136,14 @@ def raw_to_unres_expr(rv) -> UnresExpr:
     else:
         raise InvalidRawValue(f"Value of type {type(rv).__name__} "
                               + "is not a valid DOML value.")
+
+
+def resolve_val_type(uvt: UnresValType, resolver: Resolver, ctx: ResolverCtx) \
+        -> ValType:
+    if uvt == "String" \
+       or uvt == "Integer" \
+       or uvt == "Float" \
+       or uvt == "Boolean":
+        return uvt
+    else:
+        return resolver.resolve_data_type(uvt, ctx)
