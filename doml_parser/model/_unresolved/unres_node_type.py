@@ -39,6 +39,12 @@ class UnresNodeType:
                           for ntname, nt in self.node_templates.items()}
         prop_defs = {pdname: pd.resolve(resolver, ntctx)
                      for pdname, pd in self.prop_defs.items()}
+
+        if extends is not None:
+            prop_defs |= extends.prop_defs
+            edges |= extends.edges
+            node_templates |= extends.node_templates
+
         return NodeType(self.name,
                         self.description,
                         self.alias,

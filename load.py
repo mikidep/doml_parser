@@ -37,7 +37,7 @@ unres_rmdfs = [UnresRMDFModel(rmdf_dict)
 unres_domls = [UnresDOMLModel(doml_dict)
                for _, doml_dict in load_all_doml_yaml()]
 
-unres_doml = unres_domls[1]
+unres_doml = unres_domls[0]
 
 resolver = Resolver(unres_rmdfs)
 ctx = ResolverCtx(unres_doml)

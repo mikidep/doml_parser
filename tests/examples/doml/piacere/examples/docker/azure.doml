@@ -7,6 +7,7 @@ imports:
   - piacere.network.*
   - piacere.storage.*
   - piacere.application.Cloud
+  - piacere.azure.modules.*
   
 input:
 
@@ -42,13 +43,11 @@ node_templates:
       connected_to: storage_account
     
   database:
-    type: piacere.docker.DockerContainer
+    type: piacere.azure.modules.DockerContainer
     properties:
-      name: { get_input: name }
-      location: { get_input: location }
       image: 'mysql:5.7'
       ports:
-        port: "3306"
+      - port: "3306"
         protocol: 'TCP'
       mount_path: '/var/lib/mysql'
       
@@ -58,13 +57,11 @@ node_templates:
       connected_to: database_storage
 
   wordpress:
-    type: piacere.docker.DockerContainer
+    type: piacere.azure.modules.DockerContainer
     properties:
-      name: { get_input: name }
-      location: { get_input: location }
       image: 'wordpress:latest'
       ports:
-        port: "80"
+      - port: "80"
         protocol: 'TCP'
       mount_path: '/var/www/html'
       

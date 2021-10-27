@@ -25,6 +25,10 @@ class UnresDataType:
                           self.extends)
         prop_defs = {pdname: pd.resolve(resolver, ctx)
                      for pdname, pd in self.prop_defs.items()}
+
+        if extends is not None:
+            prop_defs |= extends.prop_defs
+
         return DataType(self.name,
                         self.description,
                         extends,
