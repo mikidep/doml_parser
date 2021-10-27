@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from .data_type import DataType
 from .data import Data
 from . import property_def as pdef
-from . import node_template as ntpl
 
 
 Expr = Union[int, str, bool, float, Data, 'Function']
@@ -26,7 +25,6 @@ class GetValue(Function):
 
 @dataclass
 class GetAttribute(Function):
-    node_template: 'ntpl.NodeTemplate'
     path: list[str]
 
 

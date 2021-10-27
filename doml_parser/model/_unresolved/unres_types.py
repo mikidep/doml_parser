@@ -52,15 +52,11 @@ class UnresGetValue(UnresFunction):
 class UnresGetAttribute(UnresFunction):
     def __init__(self, path: list[str]) -> None:
         super().__init__()
-        self.node_template: Unres = path[0]
-        self.path = path[1:]
+        self.path = path
 
     def resolve(self, resolver: Resolver, ctx: ResolverCtx) \
             -> GetAttribute:
-        return GetAttribute(
-            resolver.resolve_node_template(self.node_template, ctx),
-            self.path
-        )
+        return GetAttribute(self.path)
 
 
 def _attempt_resolve_expr(expr: UnresExpr,

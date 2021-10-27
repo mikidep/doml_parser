@@ -61,5 +61,3 @@ node_types:
           name: { get_value: super::name }
           location: { get_value: super::location }
           image: { get_value: image }
-        
-          

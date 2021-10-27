@@ -2,7 +2,7 @@ from typing import Optional
 from dataclasses import dataclass
 
 from . import types
-from . import node_template as ntpl
+from . import node_type as ntyp
 
 
 @dataclass
@@ -21,5 +21,5 @@ class RunData:
 @dataclass
 class ConfigureInterface:
     ansible_path: str
-    executor: Optional['ntpl.NodeTemplate']
+    executor: Optional['ntyp.NodeType']
     run_data: dict[str, RunData]

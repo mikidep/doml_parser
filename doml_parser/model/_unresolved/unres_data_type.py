@@ -27,7 +27,7 @@ class UnresDataType:
                      for pdname, pd in self.prop_defs.items()}
 
         if extends is not None:
-            prop_defs |= extends.prop_defs
+            prop_defs = extends.prop_defs | prop_defs
 
         return DataType(self.name,
                         self.description,

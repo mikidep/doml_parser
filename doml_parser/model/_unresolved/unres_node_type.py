@@ -35,15 +35,15 @@ class UnresNodeType:
         ntctx = r.ResolverCtx(ctx.unres_model,
                               # ctx.node_type,
                               r.NodeTplCtx(self.node_templates, {}))
-        node_templates = {ntname: nt.resolve(resolver, ctx)
+        node_templates = {ntname: nt.resolve(resolver, ntctx)
                           for ntname, nt in self.node_templates.items()}
         prop_defs = {pdname: pd.resolve(resolver, ntctx)
                      for pdname, pd in self.prop_defs.items()}
 
         if extends is not None:
-            prop_defs |= extends.prop_defs
-            edges |= extends.edges
-            node_templates |= extends.node_templates
+            prop_defs = extends.prop_defs | prop_defs
+            edges = extends.edges | edges
+            node_templates = extends.node_templates | node_templates
 
         return NodeType(self.name,
                         self.description,

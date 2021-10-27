@@ -114,7 +114,7 @@ class Resolver:
                                       unresnt.type,
                                       ctx
                                   ),
-                                  {},
+                                  [],
                                   [],
                                   {},
                                   {})

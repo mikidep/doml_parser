@@ -34,11 +34,12 @@ test_doml_validation()
 
 unres_rmdfs = [UnresRMDFModel(rmdf_dict)
                for _, rmdf_dict in load_all_rmdf_yaml()]
-unres_domls = [UnresDOMLModel(doml_dict)
-               for _, doml_dict in load_all_doml_yaml()]
+unres_domls = [(doml_path, UnresDOMLModel(doml_dict))
+               for doml_path, doml_dict in load_all_doml_yaml()]
 
-unres_doml = unres_domls[0]
+unres_doml_path, unres_doml = unres_domls[1]
 
+print("Path:", unres_doml_path)
 resolver = Resolver(unres_rmdfs)
 ctx = ResolverCtx(unres_doml)
 doml = unres_doml.resolve(resolver, ctx)

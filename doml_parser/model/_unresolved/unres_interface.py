@@ -29,7 +29,7 @@ class UnresConfigureInterface:
 
     def resolve(self, resolver: 'r.Resolver', ctx: 'r.ResolverCtx') \
             -> ConfigureInterface:
-        executor = map_opt(lambda e: resolver.resolve_node_template(e, ctx),
+        executor = map_opt(lambda e: resolver.resolve_node_type(e, ctx),
                            self.executor)
         run_data = {rdname: rd.resolve(resolver, ctx)
                     for rdname, rd in self.run_data.items()}

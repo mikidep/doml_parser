@@ -1,0 +1,16 @@
+metadata: 
+  _provider: aws
+  _version: '0.0.1'
+
+imports:
+ - piacere.application.Component
+ - piacere.aws.modules.*
+  
+node_types:
+  piacere.aws.modules.application.VMComponent:
+    description: ''
+    extends: piacere.application.Component
+    node_templates:
+      node:
+        type: piacere.aws.modules.compute.VirtualMachine
+          

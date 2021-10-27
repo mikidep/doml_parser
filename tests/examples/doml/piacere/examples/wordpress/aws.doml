@@ -5,6 +5,7 @@ metadata:
 imports:
   - piacere.application.*
   - piacere.network.*
+  - piacere.aws.*
  
 input:
   
@@ -67,7 +68,7 @@ node_templates:
       connected_to: cloud
 
   wordpress:
-    type: piacere.application.Component
+    type: piacere.aws.modules.application.VMComponent
     properties: 
       name: 'wordpress-component'
       location: { get_input: location }
@@ -104,7 +105,7 @@ node_templates:
               value: { get_input: db_pass}
 
   database:
-    type: piacere.application.Component
+    type: piacere.aws.modules.application.VMComponent
     properties: 
       name: 'database-component'
       location: { get_input: location }
