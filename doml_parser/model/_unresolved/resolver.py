@@ -1,6 +1,8 @@
 from typing import Callable, Optional, Tuple, TypeVar
 from dataclasses import dataclass
 
+import networkx as nx
+
 from ..types import map_or_else
 
 from . import unres_model as um
@@ -16,7 +18,10 @@ from ..node_template import NodeTemplate
 from ..data_type import DataType
 from ..provider import Provider
 
-from ...errors import ReferenceNotFound, MultipleDefinitions, TypeError
+from ...errors import (ReferenceNotFound,
+                       MultipleDefinitions,
+                       TypeError,
+                       StructureError)
 
 
 def _is_imported(ref: 'ut.Unres', ctx: 'ResolverCtx') -> bool:
@@ -36,6 +41,7 @@ class Resolver:
     def __init__(self,
                  unres_rmdfs: list['urm.UnresRMDFModel']) -> None:
         self.unres_rmdfs = unres_rmdfs
+        self._run_preliminary_checks()
 
         self.node_types: dict[str, NodeType] = {}
         self.data_types: dict[str, DataType] = {}
@@ -191,6 +197,85 @@ class Resolver:
             return p
         else:
             raise ReferenceNotFound(f"Could not find provider {pref}.")
+
+    def _run_preliminary_checks(self):
+        self._check_data_types_acyclic()
+        self._check_node_types_acyclic()
+        self._check_data_type_composition_acyclic()
+        self._check_node_types_templates_acyclic()
+
+    def _check_data_types_acyclic(self):
+        edges = [
+            (dt.name, dt.extends)
+            for unres_rmdf in self.unres_rmdfs
+            for dt in unres_rmdf.data_types.values()
+            if dt.extends is not None
+        ]
+        dig = nx.DiGraph(edges)
+        cycle = next(nx.simple_cycles(dig), None)
+        if cycle is not None:
+            cycle = zip(cycle, cycle[1:] + [cycle[0]])
+            raise StructureError(
+                "There is a cycle in data type inheritance:\n"
+                + ";\n".join(f"{dt} extends {edt}"
+                             for dt, edt in cycle)
+                + "."
+            )
+
+    def _check_node_types_acyclic(self):
+        edges = [
+            (nt.name, nt.extends)
+            for unres_rmdf in self.unres_rmdfs
+            for nt in unres_rmdf.node_types.values()
+            if nt.extends is not None
+        ]
+        dig = nx.DiGraph(edges)
+        cycle = next(nx.simple_cycles(dig), None)
+        if cycle is not None:
+            cycle = zip(cycle, cycle[1:] + [cycle[0]])
+            raise StructureError(
+                "There is a circular dependency in node type inheritance:\n"
+                + ";\n".join(f"{nt} extends {ent}"
+                             for nt, ent in cycle)
+                + "."
+            )
+
+    def _check_data_type_composition_acyclic(self):
+        edges = [
+            (dt.name, pdef.type)
+            for unres_rmdf in self.unres_rmdfs
+            for dt in unres_rmdf.data_types.values()
+            for pdef in dt.prop_defs.values()
+        ]
+        dig = nx.DiGraph(edges)
+        cycle = next(nx.simple_cycles(dig), None)
+        if cycle is not None:
+            cycle = zip(cycle, cycle[1:] + [cycle[0]])
+            raise StructureError(
+                "There is a circular dependency in data type composition:\n"
+                + ";\n".join(f"{dt} has a property of type {pt}"
+                             for dt, pt in cycle)
+                + "."
+            )
+
+    def _check_node_types_templates_acyclic(self):
+        edges = [
+            (nt.name, ntpl.type)
+            for unres_rmdf in self.unres_rmdfs
+            for nt in unres_rmdf.node_types.values()
+            for ntpl in nt.node_templates.values()
+        ]
+        dig = nx.DiGraph(edges)
+        cycle = next(nx.simple_cycles(dig), None)
+        if cycle is not None:
+            cycle = zip(cycle, cycle[1:] + [cycle[0]])
+            raise StructureError(
+                "There is a circular dependency between a node type and the "
+                + "associated node templates:"
+                + ";\n".join(f"{dt} has a template of type {edt}"
+                             for dt, edt in cycle)
+                + "."
+            )
 
 
 @dataclass

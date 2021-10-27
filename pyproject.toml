@@ -8,6 +8,7 @@ authors = ["Michele De Pascalis <michele.de.pascalis.1024@gmail.com>"]
 python = "^3.9"
 Cerberus = "^1.3.4"
 PyYAML = "^5.4.1"
+networkx = "^2.6.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
