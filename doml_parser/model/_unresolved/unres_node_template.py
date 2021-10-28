@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from ..types import map_or_apply
 
 from . import unres_types as ut
@@ -20,7 +18,7 @@ class UnresNodeTemplate:
                                  map_or_apply(ut.raw_to_unres_expr, pv))
                for ppath, pv in nt_dict.get("properties", {}).items()]
         r_dict = nt_dict.get("relationships", {})
-        self.relationships: list[Tuple[str, ut.Unres]] \
+        self.relationships: list[tuple[str, ut.Unres]] \
             = [(rname, rnode)
                for rname in r_dict
                for rnode in (

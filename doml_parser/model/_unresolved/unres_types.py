@@ -1,4 +1,4 @@
-from typing import Union, Literal, Tuple
+from typing import Union, Literal
 from abc import ABCMeta, abstractmethod
 
 from ...errors import (InvalidRawValue,
@@ -63,7 +63,7 @@ def _attempt_resolve_expr(expr: UnresExpr,
                           etypes: list[ValType],
                           resolver: Resolver,
                           ctx: ResolverCtx) \
-        -> Tuple[Expr, ValType]:
+        -> tuple[Expr, ValType]:
     for etype in etypes:
         try:
             return resolve_expr(expr,

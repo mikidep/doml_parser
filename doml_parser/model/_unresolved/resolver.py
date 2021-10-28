@@ -1,7 +1,5 @@
-from typing import Callable, Optional, Tuple, TypeVar
+from typing import Callable, Optional, TypeVar
 from dataclasses import dataclass
-
-import networkx as nx
 
 from ..types import map_or_else
 
@@ -18,10 +16,9 @@ from ..node_template import NodeTemplate
 from ..data_type import DataType
 from ..provider import Provider
 
-from ...errors import (ReferenceNotFound,
-                       MultipleDefinitions,
-                       TypeError,
-                       StructureError)
+from ...errors import ReferenceNotFound, MultipleDefinitions, TypeError
+
+from .unres_checker import UnresChecker
 
 
 def _is_imported(ref: 'ut.Unres', ctx: 'ResolverCtx') -> bool:
@@ -41,18 +38,30 @@ class Resolver:
     def __init__(self,
                  unres_rmdfs: list['urm.UnresRMDFModel']) -> None:
         self.unres_rmdfs = unres_rmdfs
-        self._run_preliminary_checks()
 
         self.node_types: dict[str, NodeType] = {}
         self.data_types: dict[str, DataType] = {}
         self.providers: dict[str, Provider] = {}
+
+        checker = UnresChecker(self.unres_rmdfs)
+        checker.run_preliminary_checks()
+        self._resolve_types()
+        checker.run_post_resolution_checks()
+
+    def _resolve_types(self) -> None:
+        for unres_rmdf in self.unres_rmdfs:
+            ctx = ResolverCtx(unres_rmdf)
+            for ntref in unres_rmdf.node_types:
+                self.resolve_node_type(ntref, ctx)
+            for dtref in unres_rmdf.data_types:
+                self.resolve_data_type(dtref, ctx)
 
     def _find_in_rmdfs(
         self,
         ref: 'ut.Unres',
         accessor: Callable[['urm.UnresRMDFModel'], dict[str, _T]],
         type_name: str
-    ) -> Optional[Tuple[_T, 'urm.UnresRMDFModel']]:
+    ) -> Optional[tuple[_T, 'urm.UnresRMDFModel']]:
         needles = [(accessor(ur)[ref], ur)
                    for ur in self.unres_rmdfs
                    if ref in accessor(ur)]
@@ -66,7 +75,7 @@ class Resolver:
             return needles[0]
 
     def _find_node_type(self, ntref: 'ut.Unres', ctx: 'ResolverCtx') \
-            -> Optional[Tuple['untyp.UnresNodeType',
+            -> Optional[tuple['untyp.UnresNodeType',
                               'um.UnresModel']]:
         if _is_imported(ntref, ctx):
             imp_nt = self._find_in_rmdfs(
@@ -140,7 +149,7 @@ class Resolver:
                             + "a node template context.")
 
     def _find_data_type(self, dtref: 'ut.Unres', ctx: 'ResolverCtx') \
-            -> Optional[Tuple['udt.UnresDataType', 'urm.UnresRMDFModel']]:
+            -> Optional[tuple['udt.UnresDataType', 'urm.UnresRMDFModel']]:
         if _is_imported(dtref, ctx):
             imp_dt = self._find_in_rmdfs(
                 dtref,
@@ -177,7 +186,7 @@ class Resolver:
             raise ReferenceNotFound(f"Could not find data type {dtref}.")
 
     def _find_provider(self, pref: 'ut.Unres') \
-            -> Optional[Tuple['up.UnresProvider', 'urm.UnresRMDFModel']]:
+            -> Optional[tuple['up.UnresProvider', 'urm.UnresRMDFModel']]:
         return self._find_in_rmdfs(pref,
                                    lambda unres_rmdf: map_or_else(
                                        lambda p: {p.alias: p},
@@ -197,85 +206,6 @@ class Resolver:
             return p
         else:
             raise ReferenceNotFound(f"Could not find provider {pref}.")
-
-    def _run_preliminary_checks(self):
-        self._check_data_types_acyclic()
-        self._check_node_types_acyclic()
-        self._check_data_type_composition_acyclic()
-        self._check_node_types_templates_acyclic()
-
-    def _check_data_types_acyclic(self):
-        edges = [
-            (dt.name, dt.extends)
-            for unres_rmdf in self.unres_rmdfs
-            for dt in unres_rmdf.data_types.values()
-            if dt.extends is not None
-        ]
-        dig = nx.DiGraph(edges)
-        cycle = next(nx.simple_cycles(dig), None)
-        if cycle is not None:
-            cycle = zip(cycle, cycle[1:] + [cycle[0]])
-            raise StructureError(
-                "There is a cycle in data type inheritance:\n"
-                + ";\n".join(f"{dt} extends {edt}"
-                             for dt, edt in cycle)
-                + "."
-            )
-
-    def _check_node_types_acyclic(self):
-        edges = [
-            (nt.name, nt.extends)
-            for unres_rmdf in self.unres_rmdfs
-            for nt in unres_rmdf.node_types.values()
-            if nt.extends is not None
-        ]
-        dig = nx.DiGraph(edges)
-        cycle = next(nx.simple_cycles(dig), None)
-        if cycle is not None:
-            cycle = zip(cycle, cycle[1:] + [cycle[0]])
-            raise StructureError(
-                "There is a circular dependency in node type inheritance:\n"
-                + ";\n".join(f"{nt} extends {ent}"
-                             for nt, ent in cycle)
-                + "."
-            )
-
-    def _check_data_type_composition_acyclic(self):
-        edges = [
-            (dt.name, pdef.type)
-            for unres_rmdf in self.unres_rmdfs
-            for dt in unres_rmdf.data_types.values()
-            for pdef in dt.prop_defs.values()
-        ]
-        dig = nx.DiGraph(edges)
-        cycle = next(nx.simple_cycles(dig), None)
-        if cycle is not None:
-            cycle = zip(cycle, cycle[1:] + [cycle[0]])
-            raise StructureError(
-                "There is a circular dependency in data type composition:\n"
-                + ";\n".join(f"{dt} has a property of type {pt}"
-                             for dt, pt in cycle)
-                + "."
-            )
-
-    def _check_node_types_templates_acyclic(self):
-        edges = [
-            (nt.name, ntpl.type)
-            for unres_rmdf in self.unres_rmdfs
-            for nt in unres_rmdf.node_types.values()
-            for ntpl in nt.node_templates.values()
-        ]
-        dig = nx.DiGraph(edges)
-        cycle = next(nx.simple_cycles(dig), None)
-        if cycle is not None:
-            cycle = zip(cycle, cycle[1:] + [cycle[0]])
-            raise StructureError(
-                "There is a circular dependency between a node type and the "
-                + "associated node templates:"
-                + ";\n".join(f"{dt} has a template of type {edt}"
-                             for dt, edt in cycle)
-                + "."
-            )
 
 
 @dataclass

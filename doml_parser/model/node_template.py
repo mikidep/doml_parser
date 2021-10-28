@@ -1,4 +1,3 @@
-from typing import Tuple
 from dataclasses import dataclass
 
 from . import node_type as ntyp
@@ -12,6 +11,6 @@ class NodeTemplate:
     name: str
     type: 'ntyp.NodeType'
     properties: list[NTplProperty]
-    relationships: list[Tuple[str, 'NodeTemplate']]
+    relationships: list[tuple[str, 'NodeTemplate']]
     interfaces: dict[str, Interface]
     capabilities: dict[str, Capability]

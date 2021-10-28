@@ -2,6 +2,7 @@ from typing import Optional
 from dataclasses import dataclass
 
 from . import property_def as pdef
+from . import types
 
 
 @dataclass
@@ -11,7 +12,7 @@ class DataType:
     extends: Optional['DataType']
     prop_defs: dict[str, 'pdef.PropertyDef']
 
-    def type_for_path(self, path: list[str]):
+    def type_for_path(self, path: list[str]) -> 'types.ValType':
         head, *tail = path
         if not tail:
             if (pd := self.prop_defs.get(head)) is not None:

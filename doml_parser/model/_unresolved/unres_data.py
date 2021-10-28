@@ -39,7 +39,7 @@ def resolve_expr(expr: 'ut.UnresExpr',
                  etype: ValType,
                  resolver: 'r.Resolver',
                  ctx: 'r.ResolverCtx') -> Expr:
-    def check_type(v, t, tname):
+    def check_type(v, t, tname) -> None:
         if type(v) is not t and not isinstance(v, ut.UnresFunction):
             raise TypeError(f"Expected value of type {tname}, "
                             + f"found value '{v}' of type {type(v).__name__}.")

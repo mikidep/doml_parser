@@ -6,6 +6,7 @@ from . import node_template as ntpl
 from .edge import Edge
 
 from .data_type import DataType
+from .types import ValType
 
 
 @dataclass
@@ -18,7 +19,7 @@ class NodeType:
     node_templates: dict[str, 'ntpl.NodeTemplate']
     edges: dict[str, Edge]
 
-    def type_for_path(self, path: list[str]):
+    def type_for_path(self, path: list[str]) -> ValType:
         head, *tail = path
         if not tail:
             if (pd := self.prop_defs.get(head)) is not None:
