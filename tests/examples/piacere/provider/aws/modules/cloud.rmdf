@@ -50,5 +50,5 @@ node_types:
         type: piacere.aws.ec2.RouteTable
         properties:
           route:
-            cidr_block: '0.0.0.0/0'
+          - cidr_block: '0.0.0.0/0'
             gateway_id: { get_value: gateway_id }

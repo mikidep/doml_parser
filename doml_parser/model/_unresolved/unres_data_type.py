@@ -15,7 +15,10 @@ class UnresDataType:
         self.description: Optional[str] = dt_dict.get("description")
         self.extends: Optional[ut.Unres] = dt_dict.get("extends")
         self.prop_defs: dict[str, UnresPropertyDef] \
-            = {pdname: UnresPropertyDef(pdname, pddict)
+            = {pdname: UnresPropertyDef(pdname,
+                                        pddict,
+                                        f"data type {self.name}",
+                                        False)
                for pdname, pddict in dt_dict["properties"].items()}
 
     def resolve(self, resolver: 'r.Resolver', ctx: 'r.ResolverCtx') \

@@ -3,6 +3,7 @@ metadata:
   _provider: azurerm
   
 imports:
+  - piacere.compute.*
   - piacere.docker.*
   - piacere.network.*
   - piacere.storage.*
@@ -46,6 +47,8 @@ node_templates:
     type: piacere.azure.modules.DockerContainer
     properties:
       image: 'mysql:5.7'
+      name: db
+      location: { get_input: location }
       ports:
       - port: "3306"
         protocol: 'TCP'
@@ -60,6 +63,8 @@ node_templates:
     type: piacere.azure.modules.DockerContainer
     properties:
       image: 'wordpress:latest'
+      name: wordpress
+      location: { get_input: location }
       ports:
       - port: "80"
         protocol: 'TCP'

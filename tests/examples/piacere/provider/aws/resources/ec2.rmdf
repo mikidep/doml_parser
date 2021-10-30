@@ -151,6 +151,9 @@ node_types:
     alias: aws_network_interface
     description: 'An elastic network interface is a logical networking component in a VPC that represents a virtual network card.'
     properties:
+      id:
+        type: String
+        
       tags:
         type: piacere.aws.data.Tag
         description: 'A map of tags to assign to the resource.'
@@ -164,7 +167,7 @@ node_types:
         
       security_groups: 
         type: piacere.aws.ec2.SecurityGroup
-        attribute: id
+        attribute: name
                     
         
   piacere.aws.ec2.SecurityGroup:
@@ -195,6 +198,9 @@ node_types:
     alias: aws_internet_gateway
     description: 'This enables the instances you launch in the VPC to communicate over the Internet.'
     properties:
+      id:
+        type: String
+
       tags:
         type: piacere.aws.data.Tag
         description: 'A map of tags to assign to the resource.'
@@ -274,7 +280,7 @@ node_types:
   piacere.aws.ec2.VPC:
     alias: aws_vpc
     description: 'A virtual private cloud (VPC) is a virtual network dedicated to your AWS account. It is logically isolated from other virtual networks in the AWS Cloud. You can launch your AWS resources, such as Amazon EC2 instances, into your VPC.'
-    properties: 
+    properties:
       tags:
         type: piacere.aws.data.Tag
         description: 'A map of tags to assign to the resource.'

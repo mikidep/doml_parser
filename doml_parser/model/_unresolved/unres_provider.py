@@ -8,7 +8,10 @@ class UnresProvider:
     def __init__(self, p_dict: dict) -> None:
         self.alias: str = p_dict["alias"]
         self.features: dict[str, UnresPropertyDef] \
-            = {pname: UnresPropertyDef(pname, pd)
+            = {pname: UnresPropertyDef(pname,
+                                       pd,
+                                       f"provider {self.alias}",
+                                       False)
                for pname, pd in p_dict["features"].items()}
 
     def resolve(self, resolver: 'r.Resolver', ctx: 'r.ResolverCtx') \

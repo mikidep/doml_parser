@@ -17,7 +17,7 @@ def test_unres_rmdf_construction() -> None:
 def test_unres_doml_construction() -> None:
     for doml_path, doml_dict in load_all_doml_yaml():
         try:
-            unres_doml = UnresDOMLModel(doml_dict)
+            unres_doml = UnresDOMLModel(doml_path, doml_dict)
             unres_doml = unres_doml
         except Exception:
             print("Error at path: " + doml_path)

@@ -21,7 +21,7 @@ class UnresNTplProperty:
                 ntype: NodeType,
                 resolver: 'r.Resolver',
                 ctx: 'r.ResolverCtx') -> NTplProperty:
-        ptype = ntype.type_for_path(self.path)
+        ptype, _ = ntype.type_for_path(self.path)
         value = map_or_apply(
                     lambda pval: resolve_expr(pval,
                                               ptype,

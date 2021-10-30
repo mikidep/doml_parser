@@ -149,7 +149,7 @@ node_types:
         
       subnet_id: 
         type: piacere.azure.network.Subnet
-        attribute: id
+        attribute: name
 
   piacere.azure.network.PublicIP:
     alias: azurerm_public_ip

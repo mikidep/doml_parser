@@ -5,6 +5,7 @@ metadata:
 imports:
   - piacere.application.*
   - piacere.network.*
+  - piacere.azure.compute.*
  
 input:
   

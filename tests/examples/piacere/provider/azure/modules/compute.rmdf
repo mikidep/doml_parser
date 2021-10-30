@@ -26,7 +26,7 @@ node_types:
           os_profile_linux_config:
             disable_password_authentication: true
             ssh_keys:
-              key_data: { get_value: super::public_key }
+            - key_data: { get_value: super::public_key }
               path: { concat: ["/home/", { get_value: super::admin_username }, "/.ssh/authorized_keys"] }
           
           storage_image_reference:
@@ -56,7 +56,7 @@ node_types:
           ip_configuration:
             name: { get_value: super::name }
             private_ip_address_allocation: 'Dynamic'
-            public_ip_address_id: { get_attribute: public_ip.id }  
+            public_ip_address_id: { get_attribute: public_ip.name }  
       
       public_ip:
         type: piacere.azure.network.PublicIP

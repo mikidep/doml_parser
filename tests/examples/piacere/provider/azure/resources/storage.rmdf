@@ -31,6 +31,9 @@ node_types:
         type: String
         description: 'Defines the type of replication to use for this storage account. Valid options are LRS, GRS, RAGRS, ZRS, GZRS and RAGZRS.'
         default: 'LRS'
+      
+      primary_access_key:
+        type: String
         
     edges:
     

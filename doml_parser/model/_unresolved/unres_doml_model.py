@@ -9,12 +9,15 @@ from . import resolver as r
 
 
 class UnresDOMLModel(UnresModel):
-    def __init__(self, doml_dict: dict) -> None:
+    def __init__(self, path: str, doml_dict: dict) -> None:
         super().__init__(doml_dict.get("imports", []))
         self.metadata: um.UnresMetadata \
             = um.UnresMetadata(doml_dict["metadata"])
         self.input: dict[str, UnresPropertyDef] \
-            = {iname: UnresPropertyDef(iname, idict)
+            = {iname: UnresPropertyDef(iname,
+                                       idict,
+                                       f"DOML model {path}",
+                                       True)
                for iname, idict in doml_dict.get("input", {}).items()}
         self.node_templates: dict[str, UnresNodeTemplate] \
             = {ntname: UnresNodeTemplate(ntname, ntdict)
@@ -30,7 +33,6 @@ class UnresDOMLModel(UnresModel):
         input = {iname: i.resolve(resolver, ctx)
                  for iname, i in self.input.items()}
         ntctx = r.ResolverCtx(ctx.unres_model,
-                              # ctx.node_type,
                               r.NodeTplCtx(self.node_templates, {}))
         node_templates = {ntname: nt.resolve(resolver, ntctx)
                           for ntname, nt in self.node_templates.items()}

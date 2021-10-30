@@ -34,6 +34,9 @@ node_types:
         description: 'Location of deployment'
         required: true
         default: 'westus2'
+      
+      ip_address:
+        type: String
         
     node_templates:
     

@@ -13,4 +13,8 @@ node_types:
     node_templates:
       node:
         type: piacere.aws.modules.compute.VirtualMachine
+        properties:
+          name: { get_value: name }
+          location: { get_value: location }
+          key_name: { get_value: name }
           

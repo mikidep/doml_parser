@@ -62,4 +62,5 @@ node_types:
         type: piacere.azure.network.Subnet
         properties:
           name: { get_value: super::name }
-          address_prefixes: { get_value: super::cidr_range }
+          address_prefixes:
+          - { get_value: super::cidr_range }

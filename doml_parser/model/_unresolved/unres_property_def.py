@@ -10,15 +10,21 @@ from .unres_data import resolve_expr
 
 
 class UnresPropertyDef:
-    def __init__(self, name: str, pd_dict: dict) -> None:
+    def __init__(self,
+                 name: str,
+                 pd_dict: dict,
+                 context: str,
+                 is_input: bool) -> None:
         self.name = name
         self.type: ut.UnresValType = pd_dict["type"]
         self.description: Optional[str] = pd_dict.get("description")
-        self.required: bool = pd_dict.get("required", True)
+        self.required: bool = pd_dict.get("required", False)
         self.multiple: bool = pd_dict.get("multiple", False)
         self.default: Optional[Union[ut.UnresExpr, list[ut.UnresExpr]]] \
             = map_opt(lambda d: map_or_apply(ut.raw_to_unres_expr, d),
                       pd_dict.get("default"))
+        self.context = context
+        self.is_input = is_input
 
     def resolve(self, resolver: 'r.Resolver', ctx: 'r.ResolverCtx') \
             -> PropertyDef:
@@ -40,4 +46,6 @@ class UnresPropertyDef:
                            self.description,
                            self.required,
                            self.multiple,
-                           default)
+                           default,
+                           self.context,
+                           self.is_input)

@@ -14,10 +14,10 @@ from ..types import (Function,
                      GetInput,
                      ValType,
                      Expr,
-                     map_or_apply)
+                     map_or_apply,
+                     valtype_name)
 from .unres_doml_model import UnresDOMLModel
 from .unres_data import resolve_expr
-from ..data_type import DataType
 
 Unres = str
 
@@ -73,7 +73,7 @@ def _attempt_resolve_expr(expr: UnresExpr,
         except TypeError:
             pass
     type_names = [
-        t.name if type(t) is DataType else str(t)
+        valtype_name(t)
         for t in etypes
     ]
     raise TypeError(f"Expression '{expr}' could not be resolved "
@@ -117,7 +117,11 @@ def raw_to_unres_expr(rv) -> UnresExpr:
     elif type(rv) is dict:
         if "get_value" in rv:
             path: str = rv["get_value"]
-            return UnresGetValue(path.split("."))
+            super = False
+            if path.startswith("super::"):
+                super = True
+                path = path[7:]
+            return UnresGetValue(path.split("."), super)
         elif "get_attribute" in rv:
             path: str = rv["get_attribute"]
             return UnresGetAttribute(path.split("."))

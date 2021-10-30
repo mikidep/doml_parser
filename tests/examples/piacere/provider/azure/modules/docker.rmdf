@@ -38,7 +38,7 @@ node_types:
               name: { get_value: super::image }
               ports: { get_value: ports }
               volume:
-                name: 'volume-docker-container'
+              - name: 'volume-docker-container'
                 mount_path: { get_value: mount_path }
                 empty_dir: true
                 

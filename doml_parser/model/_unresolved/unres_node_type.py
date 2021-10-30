@@ -17,7 +17,10 @@ class UnresNodeType:
         self.alias: Optional[str] = nt_dict.get("alias")
         self.extends: Optional[ut.Unres] = nt_dict.get("extends")
         self.prop_defs: dict[str, UnresPropertyDef] \
-            = {pdname: UnresPropertyDef(pdname, pddict)
+            = {pdname: UnresPropertyDef(pdname,
+                                        pddict,
+                                        f"node type {self.name}",
+                                        False)
                for pdname, pddict in nt_dict.get("properties", {}).items()}
         self.node_templates: dict[str, UnresNodeTemplate] \
             = {ntname: UnresNodeTemplate(ntname, ntdict)
@@ -26,6 +29,14 @@ class UnresNodeType:
             = {ename: UnresEdge(ename, edict)
                for ename, edict in nt_dict.get("edges", {}).items()}
 
+        # FIXME: Asked Tasio
+        # self.prop_defs["id"] = UnresPropertyDef(
+        #     "id",
+        #     {"type": "String"},
+        #     f"node type {self.name}",
+        #     False
+        # )
+
     def resolve(self, resolver: 'r.Resolver', ctx: 'r.ResolverCtx') \
             -> NodeType:
         extends = map_opt(lambda ref: resolver.resolve_node_type(ref, ctx),
@@ -33,7 +44,6 @@ class UnresNodeType:
         edges = {ename: edge.resolve(resolver, ctx)
                  for ename, edge in self.edges.items()}
         ntctx = r.ResolverCtx(ctx.unres_model,
-                              # ctx.node_type,
                               r.NodeTplCtx(self.node_templates, {}))
         node_templates = {ntname: nt.resolve(resolver, ntctx)
                           for ntname, nt in self.node_templates.items()}

@@ -54,7 +54,7 @@ node_types:
      
       network: 
         type: piacere.gcp.network.Network
-        attribute: self_link  
+        attribute: name  
         
   piacere.gcp.network.Firewall:
     alias: google_compute_firewall
@@ -89,4 +89,4 @@ node_types:
      
       network: 
         type: piacere.gcp.network.Network
-        attribute: self_link
+        attribute: name

@@ -7,6 +7,7 @@ imports:
   - piacere.network.*
   - piacere.storage.*
   - piacere.application.Cloud
+  - piacere.azure.modules.*
   
 input:
 
@@ -47,7 +48,7 @@ node_templates:
       connected_to: storage_account
     
   hadoop:
-    type: piacere.docker.DockerContainer
+    type: piacere.azure.modules.DockerContainer
     properties:
       name: 'piacere-hadoop'
       location: { get_input: location }
@@ -58,7 +59,7 @@ node_templates:
             - port: '9000'
             - port: '50070'
           volume:
-            name: 'namenode'
+          - name: 'namenode'
             mount_path: '/hadoop/dfs/name'
             read_only: false
         - name: 'datanode'
@@ -68,7 +69,7 @@ node_templates:
             - port: '9866'
             - port: '9867'
           volume:
-            name: 'datanode'
+          - name: 'datanode'
             mount_path: '/hadoop/dfs/data'
             read_only: false
         - name: 'hue'

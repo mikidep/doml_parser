@@ -96,7 +96,11 @@ class Resolver:
 
     def resolve_node_type(self, ntref: 'ut.Unres', ctx: 'ResolverCtx') \
             -> NodeType:
-        if (nt := self.node_types.get(ntref)) is not None:
+        # In order to return cached type, it must be visible
+        if (_is_imported(ntref, ctx)
+            or (type(ctx.unres_model) is urm.UnresRMDFModel
+                and ntref in ctx.unres_model.node_types)) \
+           and (nt := self.node_types.get(ntref)) is not None:
             return nt
         elif (unres_nt_r := self._find_node_type(ntref, ctx)) is not None:
             unresnt, unresrmdf = unres_nt_r
@@ -106,9 +110,7 @@ class Resolver:
                           None,
                           {}, {}, {})
             self.node_types[ntref] = nt
-            nt_ = unresnt.resolve(self, ResolverCtx(
-                unresrmdf  # , node_type=nt
-            ))
+            nt_ = unresnt.resolve(self, ResolverCtx(unresrmdf))
             nt.extends = nt_.extends
             nt.prop_defs = nt_.prop_defs
             nt.node_templates = nt_.node_templates
@@ -169,7 +171,11 @@ class Resolver:
 
     def resolve_data_type(self, dtref: 'ut.Unres', ctx: 'ResolverCtx') \
             -> DataType:
-        if (dt := self.data_types.get(dtref)) is not None:
+        # In order to return cached type, it must be visible
+        if (_is_imported(dtref, ctx)
+            or (type(ctx.unres_model) is urm.UnresRMDFModel
+                and dtref in ctx.unres_model.data_types)) \
+           and (dt := self.data_types.get(dtref)) is not None:
             return dt
         elif (unres_dt_r := self._find_data_type(dtref, ctx)) is not None:
             unresdt, unresrmdf = unres_dt_r
@@ -217,5 +223,4 @@ class NodeTplCtx:
 @dataclass
 class ResolverCtx:
     unres_model: 'um.UnresModel'
-    # node_type: Optional[NodeType] = None
     ntpl_ctx: Optional[NodeTplCtx] = None

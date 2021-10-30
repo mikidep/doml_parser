@@ -35,7 +35,6 @@ class UnresNodeTemplate:
 
     def resolve(self, resolver: 'r.Resolver', ctx: 'r.ResolverCtx') \
             -> NodeTemplate:
-        # Resolver.resolve_node_type will forget the node_templates in ctx
         ntype = resolver.resolve_node_type(self.type,
                                            ctx)
         properties = [p.resolve(ntype, resolver, ctx)
