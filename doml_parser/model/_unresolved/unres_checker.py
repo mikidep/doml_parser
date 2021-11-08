@@ -90,7 +90,7 @@ class UnresChecker:
 
     def _check_node_types_templates_acyclic(self) -> None:
         edges = [
-            (nt.name, ntpl.type, cast(str, "has a template of type"))
+            (nt.name, ntpl.type, cast(str, "declares a node template of type"))
             for unres_rmdf in self.unres_rmdfs
             for nt in unres_rmdf.node_types.values()
             for ntpl in nt.node_templates.values()

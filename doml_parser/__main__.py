@@ -1,4 +1,5 @@
 from typing import cast, Union
+import sys
 from pathlib import Path
 from glob import glob
 
@@ -13,7 +14,11 @@ def main() -> None:
     rmdf_paths = cast(list[Union[str, Path]],
                       glob("**/*.rmdf", recursive=True))
 
-    load_doml_from_path(doml_path, rmdf_paths)
+    try:
+        load_doml_from_path(doml_path, rmdf_paths)
+    except Exception as e:
+        print(f"{type(e).__name__}: {e}", file=sys.stderr)
+        exit(1)
 
 
 main()

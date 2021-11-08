@@ -74,7 +74,7 @@ class NodeTemplate:
                         raise TypeError(
                             f"In node template {self.name} of type "
                             + f"{self.type.name}: property {pname} should have"
-                            + " type {ptname}, but value given has type "
+                            + f" type {ptname}, but value given has type "
                             + f"{types.valtype_name(it)}."
                         )
                     if not m:
@@ -91,7 +91,7 @@ class NodeTemplate:
                         raise TypeError(
                             f"In node template {self.name} of type "
                             + f"{self.type.name}: property {pname} should have"
-                            + " type {ptname}, but value given has type "
+                            + f" type {ptname}, but value given has type "
                             + f"{types.valtype_name(it)}."
                         )
                     if m:
