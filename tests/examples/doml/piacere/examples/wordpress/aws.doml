@@ -106,7 +106,7 @@ node_templates:
 
   database:
     type: piacere.aws.modules.application.VMComponent
-    properties: 
+    properties:
       name: 'database-component'
       location: { get_input: location }
       node.public_key: { get_input: public_key }

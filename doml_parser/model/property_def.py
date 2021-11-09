@@ -25,7 +25,7 @@ class PropertyDef:
                 if type(self.default) is list:
                     for i, dv in enumerate(self.default):
                         it, m = types.infer_type(dv, ctx)
-                        if it != self.type:
+                        if not types.valtype_inherits(it, self.type):
                             raise TypeError(
                                 f"{pd_string} '{self.name}' of "
                                 + f"{self.context} has type "
@@ -44,7 +44,7 @@ class PropertyDef:
                 else:
                     it, m = types.infer_type(cast(types.Expr, self.default),
                                              ctx)
-                    if it != self.type:
+                    if not types.valtype_inherits(it, self.type):
                         raise TypeError(
                             f"{pd_string} '{self.name}' of "
                             + f"{self.context} has type "
@@ -61,7 +61,7 @@ class PropertyDef:
                 if type(self.default) is not list:
                     it, m = types.infer_type(cast(types.Expr, self.default),
                                              ctx)
-                    if it != self.type:
+                    if not types.valtype_inherits(it, self.type):
                         raise TypeError(
                             f"{pd_string} '{self.name}' of "
                             + f"{self.context} has type "

@@ -39,7 +39,7 @@ class Data:
                     pval = cast(list[types.Expr], pval)
                     for i, dv in enumerate(pval):
                         it, m = types.infer_type(dv, ctx)
-                        if it != ptype:
+                        if not types.valtype_inherits(it, ptype):
                             raise TypeError(
                                 f"In instance of data type {self.type.name}: "
                                 + f"multiple-valued property {pname} should "
@@ -58,7 +58,7 @@ class Data:
                             dv._check(ctx)
                 else:
                     it, m = types.infer_type(cast(types.Expr, pval), ctx)
-                    if it != ptype:
+                    if not types.valtype_inherits(it, ptype):
                         raise TypeError(
                             f"In instance of data type {self.type.name}: "
                             + f"property {pname} should have type {ptname}, "
@@ -74,7 +74,7 @@ class Data:
             else:
                 if type(pval) is not list:
                     it, m = types.infer_type(cast(types.Expr, pval), ctx)
-                    if it != ptype:
+                    if not types.valtype_inherits(it, ptype):
                         raise TypeError(
                             f"In instance of data type {self.type.name}: "
                             + f"property {pname} should have type {ptname}, "

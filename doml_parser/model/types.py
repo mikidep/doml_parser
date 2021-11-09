@@ -23,6 +23,15 @@ def valtype_name(vt: ValType) -> str:
         return cast(str, vt)
 
 
+def valtype_inherits(vt: ValType, inhvt: ValType) -> bool:
+    if type(vt) is DataType and type(inhvt) is DataType:
+        return vt.inherits_from(inhvt)
+    elif type(vt) is str and type(inhvt) is str:
+        return vt == inhvt
+    else:
+        return False
+
+
 @dataclass
 class TypingCtx:
     ntype: Optional[NodeType]

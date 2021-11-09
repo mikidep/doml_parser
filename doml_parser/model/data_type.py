@@ -12,6 +12,10 @@ class DataType:
     extends: Optional['DataType']
     prop_defs: dict[str, 'pdef.PropertyDef']
 
+    def inherits_from(self, dt: 'DataType') -> bool:
+        return self == dt \
+               or (self.extends is not None and self.extends.inherits_from(dt))
+
     # Returns type for path and whether to expect a multiple value
     def type_for_path(self, path: list[str]) -> tuple['types.ValType', bool]:
         head, *tail = path

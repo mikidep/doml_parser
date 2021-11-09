@@ -51,7 +51,7 @@ class NodeTemplate:
                     pval = cast(list[types.Expr], pval)
                     for i, dv in enumerate(pval):
                         it, m = types.infer_type(dv, ctx)
-                        if it != ptype:
+                        if not types.valtype_inherits(it, ptype):
                             raise TypeError(
                                 f"In node template {self.name} of type "
                                 + f"{self.type.name}: multiple-valued property"
@@ -70,7 +70,7 @@ class NodeTemplate:
                             dv._check(ctx)
                 else:
                     it, m = types.infer_type(cast(types.Expr, pval), ctx)
-                    if it != ptype:
+                    if not types.valtype_inherits(it, ptype):
                         raise TypeError(
                             f"In node template {self.name} of type "
                             + f"{self.type.name}: property {pname} should have"
@@ -87,7 +87,7 @@ class NodeTemplate:
             else:
                 if type(pval) is not list:
                     it, m = types.infer_type(cast(types.Expr, pval), ctx)
-                    if it != ptype:
+                    if not types.valtype_inherits(it, ptype):
                         raise TypeError(
                             f"In node template {self.name} of type "
                             + f"{self.type.name}: property {pname} should have"
@@ -112,7 +112,7 @@ class NodeTemplate:
 
         for rname, rel in self.relationships:
             if (e := self.type.edges.get(rname)) is not None:
-                if rel.type != e.type:
+                if not rel.type.inherits_from(e.type):
                     raise TypeError(
                         f"In node template {self.name} of type "
                         + f"{self.type.name}: edge {rname} has node type "

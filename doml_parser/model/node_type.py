@@ -19,6 +19,10 @@ class NodeType:
     node_templates: dict[str, 'ntpl.NodeTemplate']
     edges: dict[str, Edge]
 
+    def inherits_from(self, nt: 'NodeType') -> bool:
+        return self == nt \
+               or (self.extends is not None and self.extends.inherits_from(nt))
+
     # Returns type for path and whether to expect a multiple value
     def type_for_path(
         self,
